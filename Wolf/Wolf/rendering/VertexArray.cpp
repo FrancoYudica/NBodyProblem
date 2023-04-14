@@ -1,5 +1,6 @@
 #include "VertexArray.h"
 #include <glad/glad.h>
+#include <iostream>
 
 using namespace Wolf::Rendering;
 
@@ -51,7 +52,6 @@ void VertexArray::add_vertex_buffer(const std::shared_ptr<VertexBuffer>& vb)
 	_VertexBuffers.push_back(vb);
 	bind();
 	vb->bind();
-
 	BufferLayout layout = vb->get_buffer_layout();
 
 	for (BufferAttribute& attribute : layout)
@@ -63,7 +63,7 @@ void VertexArray::add_vertex_buffer(const std::shared_ptr<VertexBuffer>& vb)
 			ShaderDataTypeToOpenGLBaseType(attribute.Type),
 			attribute.Normalized ? GL_TRUE : GL_FALSE,
 			layout.GetStride(),
-			(void*)0//attribute.Offset
+			(void*)attribute.Offset
 		);
 		_AttributeIndex++;
 	}

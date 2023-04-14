@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "WEngine.h"
-#include "Sandbox/OpenGLLayer.h"
+#include "Sandbox/NBodyLayer.h"
 
 
 int main()
@@ -12,7 +12,7 @@ int main()
 	Wolf::Layers::ImGuiLayer imguiLayer = Wolf::Layers::ImGuiLayer();
 	app.add_layer(&imguiLayer);
 
-	Wolf::SandboxLayers::OpenGLLayer openglLayer = Wolf::SandboxLayers::OpenGLLayer();
+	Wolf::SandboxLayers::NBodyLayer openglLayer = Wolf::SandboxLayers::NBodyLayer();
 	app.add_layer(&openglLayer);
 
 	app.run();

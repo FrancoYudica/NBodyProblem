@@ -26,6 +26,9 @@ namespace Wolf
             return false;
         }
         _mainWindow.MakeContextCurrent();
+        _GraphicsContext = std::make_shared<GraphicsContext>(_mainWindow);
+        _GraphicsContext->Init();
+
         return true;
     }
 
@@ -73,11 +76,6 @@ namespace Wolf
 
     void Application::run()
     {
-        //_mainWindow.MakeContextCurrent();
-        _GraphicsContext = std::make_shared<GraphicsContext>(_mainWindow);
-        _GraphicsContext->Init();
-
-
         _clock = Clock();
         _clock.Start();
         Clock deltaClock;
@@ -91,8 +89,6 @@ namespace Wolf
 
             deltaClock.Start();
 
-            //glClearColor(0, 0, 0, 1);
-            //glClear(GL_COLOR_BUFFER_BIT);
             on_render();
             _GraphicsContext->SwapBuffers();
             
