@@ -6,7 +6,7 @@
 using namespace Wolf::Rendering;
 
 
-const char* vertexShaderSourceStr = "#version 330 core\n"
+static const char* vertexShaderSourceStr = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec4 aColor;\n"
 "out vec4 _Color;\n"
@@ -16,7 +16,7 @@ const char* vertexShaderSourceStr = "#version 330 core\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "}\0";
 //Fragment Shader source code
-const char* fragmentShaderSourceStr = "#version 330 core\n"
+static const char* fragmentShaderSourceStr = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "in vec4 _Color;\n"
 "void main()\n"
