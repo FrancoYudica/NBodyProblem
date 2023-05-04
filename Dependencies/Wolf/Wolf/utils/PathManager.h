@@ -23,7 +23,7 @@ namespace Wolf
 
         Path operator / (const std::string& extra) const
         { 
-            return _path.string() + '\\' + extra;
+            return _path.string() + '/' + extra;
         }
         Path& operator /= (const std::string& extra) 
         { 
