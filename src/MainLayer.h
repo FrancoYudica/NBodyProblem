@@ -35,6 +35,7 @@ namespace NBody
 			glm::vec2 _positive_furthest_pos;
 			glm::vec2 _negative_furthest_pos;
 			BHTree _bhtree;
+			bool _using_tree;
 	};
 }
 

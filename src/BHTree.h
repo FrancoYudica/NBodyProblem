@@ -9,7 +9,7 @@ class BHTree
     public:
         BHTree() = default;
         BHTree(float size, glm::vec2 bottom_left);
-        void insert(Body* body);
+        void insert(const Body* body);
         void attract(Body* body, float delta_seconds) const;
         float get_size() const { return _size; }
         glm::vec2 get_bottom_left() const { return _bottom_left; }
@@ -18,7 +18,7 @@ class BHTree
 
     private:
         void _split();
-        uint32_t _get_quadrant_index(Body* body) const;
+        uint32_t _get_quadrant_index(const Body* body) const;
 
     private:
         glm::vec2 _bottom_left;
@@ -30,7 +30,7 @@ class BHTree
         glm::vec2 _mass_center;
         glm::vec2 _mass_center_denominator;
         glm::vec2 _center;
-        Body* _leaf_body;
+        const Body* _leaf_body;
         std::vector<BHTree> _quadrants;
 };
 

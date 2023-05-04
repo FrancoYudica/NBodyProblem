@@ -9,7 +9,7 @@ BHTree::BHTree(float size, glm::vec2 bottom_left)
     // Empty body
 }
 
-void BHTree::insert(Body* body)
+void BHTree::insert(const Body* body)
 {
     if (_body_count == 0)
     {
@@ -43,7 +43,7 @@ void BHTree::insert(Body* body)
 void BHTree::attract(Body* body, float delta_seconds) const
 {
     if (_body_count == 0 || body == _leaf_body)
-        return;
+       return;
 
     float g = 6e-5;
     float smoothing = 0.001f;
@@ -52,12 +52,12 @@ void BHTree::attract(Body* body, float delta_seconds) const
 		glm::vec2 dir = body->position - _leaf_body->position;
 		float force_magnitude = g * body->mass * _leaf_body->mass / (dir.x * dir.x + dir.y * dir.y + smoothing);
 		glm::vec2 force = (delta_seconds * force_magnitude) * glm::normalize(dir);
-		_leaf_body->velocity += force;
+		//_leaf_body->velocity += force;
 		body->velocity -= force;
         return;
     }
 
-    
+    /*
     glm::vec2 dir = body->position - _mass_center;
     float distance = length(dir);
     if (_size / distance < 0.5f)
@@ -66,13 +66,13 @@ void BHTree::attract(Body* body, float delta_seconds) const
 		glm::vec2 force = (delta_seconds * force_magnitude) * (dir / distance);
 		body->velocity -= force;
     }
-
+    */
     else
     {
-        _quadrants[0].attract(body, delta_seconds);
-        _quadrants[1].attract(body, delta_seconds);
-        _quadrants[3].attract(body, delta_seconds);
-        _quadrants[3].attract(body, delta_seconds);
+        for (uint32_t i = 0; i < 4; i++)
+        {
+            _quadrants[i].attract(body, delta_seconds);
+        }
     }
 }
 void BHTree::_split()
@@ -90,7 +90,7 @@ void BHTree::_split()
     _quadrants.emplace_back(BHTree(size, quadrant3_pos));
 }
 
-uint32_t BHTree::_get_quadrant_index(Body* body) const
+uint32_t BHTree::_get_quadrant_index(const Body* body) const
 {
 
     // In the right side
