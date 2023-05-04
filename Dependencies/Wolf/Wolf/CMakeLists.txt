@@ -42,4 +42,6 @@ target_include_directories(
 )
 
 target_compile_definitions(wolf_engine_lib INTERFACE WOLF_ENGINE_VERSION=0.1)
+
+# WOLF ENGINE REQUIERES WOLF_ENGINE_RELATIVE_TO_ROOT_PATH to be set by the user
 target_compile_definitions(wolf_engine_lib PUBLIC WOLF_ENGINE_PATH="${WOLF_ENGINE_RELATIVE_TO_ROOT_PATH}")

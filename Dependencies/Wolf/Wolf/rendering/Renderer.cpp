@@ -97,6 +97,4 @@ void Renderer2D::submit_line(const glm::vec3& p0, const glm::vec3& p1, const glm
 void Renderer2D::submit_line_interpolated(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness)
 {
 	_data.line_batch.submit_primitive_interpolated(p0, p1, color, thickness);
-
-	std::cout << "Hello my dear lady famous yess" << std::endl;
 }
