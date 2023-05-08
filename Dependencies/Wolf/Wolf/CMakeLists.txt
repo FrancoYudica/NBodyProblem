@@ -16,6 +16,9 @@ file(GLOB WOLF_NUMERICAL_CPP     numerical/*.cpp)
 file(GLOB WOLF_UTILS_H       utils/*.h)
 file(GLOB WOLF_UTILS_CPP     utils/*.cpp)
 
+file(GLOB WOLF_INPUT_H       input/*.h)
+file(GLOB WOLF_INPUT_CPP     input/*.cpp)
+
 add_library(
     wolf_engine_lib STATIC
     ${WOLF_CORE_H}
@@ -28,6 +31,8 @@ add_library(
     ${WOLF_NUMERICAL_CPP}
     ${WOLF_UTILS_H}
     ${WOLF_UTILS_CPP}
+    ${WOLF_INPUT_H}
+    ${WOLF_INPUT_CPP}
     "entry_point.h"
     )
 

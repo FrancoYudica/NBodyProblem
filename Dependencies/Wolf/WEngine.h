@@ -34,4 +34,8 @@
 #include "Wolf/utils/PathManager.h"
 #include "Wolf/entry_point.h"
 
+// Input
+#include "Wolf/input/input_transform.h"
+#include "Wolf/input/input.h"
+
 #endif

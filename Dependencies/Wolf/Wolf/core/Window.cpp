@@ -9,8 +9,6 @@ namespace Wolf
     bool Window::initialize(const Window::Configuration& config)
     {
         GLFWmonitor* monitor = config.fullscreen ? glfwGetPrimaryMonitor() : NULL;
-
-        // OpenGL version
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -42,7 +40,6 @@ namespace Wolf
             Application::get()->on_event(&event);
 
         });
-
         glfwSetWindowCloseCallback(windowNativePtr, [](GLFWwindow* window) {
             WindowUserData* userData = (WindowUserData*)glfwGetWindowUserPointer(window);
             WindowClosedEvent event(userData->window_ptr);

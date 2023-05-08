@@ -7,12 +7,12 @@
 #include <vector>
 #include "Body.h"
 #include "BHTree.h"
+#include <memory>
 
 using namespace Wolf;
 
 namespace NBody
 {
-
 
 
 	class MainLayer : public Wolf::Layer
@@ -26,16 +26,22 @@ namespace NBody
 			virtual void on_ui_render_start() override;
 			virtual void on_ui_render_finish() override;
 			virtual void on_render() override;
+
+		private:
+			void _reset_simulation();
 		private:
 			Wolf::Rendering::Camera _camera;
 			Wolf::Rendering::Camera _debug_camera;
+
 			std::unordered_map<KeyCode, bool> _key_states;
-			std::vector <Body> _points;
+			std::vector <Body> _bodies;
 
 			glm::vec2 _positive_furthest_pos;
 			glm::vec2 _negative_furthest_pos;
-			BHTree _bhtree;
+			std::unique_ptr<BHTree> _bhtree;
 			bool _using_tree;
+			bool _render_tree;
+			bool _paralell_execution;
 	};
 }
 
