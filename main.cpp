@@ -7,6 +7,8 @@
 
 int main()
 {
+
+	// REQUIERED CODE
 	Wolf::init();
 	auto app = Wolf::Application::get();
 	bool sucess = app->initialize(Wolf::Window::Configuration());
@@ -15,14 +17,12 @@ int main()
 		std::cout << "Appication init fail" << std::endl;
 		return -1;
 	}
+	;
+	app->set_imgui_layer(new Wolf::Layers::ImGuiLayer());
+	// END OF REQUIERED CODE
 
-	// If imgui is used
-	Wolf::Layers::ImGuiLayer imguiLayer = Wolf::Layers::ImGuiLayer();
-	app->add_layer(&imguiLayer);
-	
 	// CLient layer	
-	NBody::MainLayer layer;
-	app->add_layer(&layer);
+	app->add_layer(new NBody::MainLayer());
 	app->run();
 	return 0;
 }

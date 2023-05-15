@@ -99,7 +99,7 @@ void LineBatch::_flush()
     _submitions_count = 0;
 }
 
-void LineBatch::submit_primitive(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness)
+void LineBatch::submit_primitive(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness)
 {   
     auto diff = p1 - p0;
     float angle = std::atan2(diff.y, diff.x);
@@ -110,13 +110,13 @@ void LineBatch::submit_primitive(const glm::vec3& p0, const glm::vec3& p1, const
 	unsigned int index = _submitions_count * 6;
     float half_thickness = thickness * 0.5f;
 	// Sets the array data
-	_buffer[index + 0].position = p0 + glm::vec3(-x_displacement, -y_displacement, 0);
-	_buffer[index + 1].position = p0;
-	_buffer[index + 2].position = p0 + glm::vec3(x_displacement, y_displacement, 0);
+	_buffer[index + 0].position = {p0.x - x_displacement, p0.y - y_displacement, 0.0f};
+	_buffer[index + 1].position = {p0.x, p0.y, 0.0f};
+	_buffer[index + 2].position = {p0.x + x_displacement, p0.y + y_displacement, 0.0f};
 
-	_buffer[index + 3].position = p1 + glm::vec3(-x_displacement, -y_displacement, 0);
-	_buffer[index + 4].position = p1;
-	_buffer[index + 5].position = p1 + glm::vec3(x_displacement, y_displacement, 0);
+	_buffer[index + 3].position = {p1.x - x_displacement, p1.y - y_displacement, 0.0f};
+	_buffer[index + 4].position = {p1.x, p1.y, 0.0f};
+	_buffer[index + 5].position = {p1.x + x_displacement, p1.y + y_displacement, 0.0f};
 
    	_buffer[index + 0].color = color;
 	_buffer[index + 1].color = color;
@@ -128,7 +128,7 @@ void LineBatch::submit_primitive(const glm::vec3& p0, const glm::vec3& p1, const
 		_flush();
 }
 
-void LineBatch::submit_primitive_interpolated(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness)
+void LineBatch::submit_primitive_interpolated(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness)
 {   
     auto diff = p1 - p0;
     float angle = std::atan2(diff.y, diff.x);
@@ -139,13 +139,13 @@ void LineBatch::submit_primitive_interpolated(const glm::vec3& p0, const glm::ve
 	unsigned int index = _submitions_count * 6;
     float half_thickness = thickness * 0.5f;
 	// Sets the array data
-	_buffer[index + 0].position = p0 + glm::vec3(-x_displacement, -y_displacement, 0);
-	_buffer[index + 1].position = p0;
-	_buffer[index + 2].position = p0 + glm::vec3(x_displacement, y_displacement, 0);
+	_buffer[index + 0].position = {p0.x - x_displacement, p0.y - y_displacement, 0.0f};
+	_buffer[index + 1].position = {p0.x, p0.y, 0.0f};
+	_buffer[index + 2].position = {p0.x + x_displacement, p0.y + y_displacement, 0.0f};
 
-	_buffer[index + 3].position = p1 + glm::vec3(-x_displacement, -y_displacement, 0);
-	_buffer[index + 4].position = p1;
-	_buffer[index + 5].position = p1 + glm::vec3(x_displacement, y_displacement, 0);
+	_buffer[index + 3].position = {p1.x - x_displacement, p1.y - y_displacement, 0.0f};
+	_buffer[index + 4].position = {p1.x, p1.y, 0.0f};
+	_buffer[index + 5].position = {p1.x + x_displacement, p1.y + y_displacement, 0.0f};
 
     _buffer[index + 0].color = glm::vec4(0);
     _buffer[index + 1].color = color;

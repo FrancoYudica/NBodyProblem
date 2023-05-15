@@ -22,6 +22,8 @@ namespace Wolf
 			Window* window = instance->get_main_window();
 			ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window->get_native_ptr(), true);
 			ImGui_ImplOpenGL3_Init("#version 330");	
+			capture_events = true;
+			name = "ImGuiLayer";
 		}
 
 		void ImGuiLayer::on_end()
@@ -44,7 +46,16 @@ namespace Wolf
 		void ImGuiLayer::on_event(Event* event)
 		{
 			EventDispatcher dispatcher(event);
-			dispatcher.dispatch<Event>(EventType::ButtonDown, [](Event* e) { std::cout << "Button pressed" << std::endl; return false; });
+			ImGuiIO io = ImGui::GetIO();
+
+			if (capture_events)
+			{
+				if (event->category & EventCategory::CategoryMouseButton)
+					event->handled |= io.WantCaptureMouse;
+					
+				if (event->category & EventCategory::CategoryKeyboard)
+					event->handled |= io.WantCaptureKeyboard;
+			}
 		}
 		void ImGuiLayer::on_ui_render_start()
 		{
@@ -59,6 +70,7 @@ namespace Wolf
 			// Renders the ImGUI elements
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			//ImGui::EndFrame();
 		}
 
 	}

@@ -27,6 +27,7 @@ namespace Wolf
         void on_update(const Time& time);
         void on_render();
         void add_layer(Layer* layer) { _layer_stack.add(layer); }
+        void set_imgui_layer(Layer* layer) { _imgui_layer = layer; _layer_stack.add_overlay(layer); }
         bool remove_layer(Layer* layer) { return _layer_stack.remove(layer); }
         void add_overlay(Layer* layer) { _layer_stack.add_overlay(layer); }
         Window* get_main_window() { return &_mainWindow; }
@@ -49,6 +50,7 @@ namespace Wolf
         Clock _clock;
         Time _render_time;
         Time _update_time;
+        Layer* _imgui_layer;
         std::shared_ptr<GraphicsContext> _graphics_context;
     };
 }

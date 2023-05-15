@@ -24,8 +24,8 @@ namespace Wolf
 			void shutdown() override;
 			void new_frame() override;
 			void end_frame() override;
-            void submit_primitive(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness);
-            void submit_primitive_interpolated(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness);
+            void submit_primitive(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness);
+            void submit_primitive_interpolated(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness);
             private:
             void _flush();
 

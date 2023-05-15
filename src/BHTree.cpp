@@ -29,7 +29,7 @@ BHTree::~BHTree()
     }
 }
 
-void BHTree::insert(const Body* body)
+void BHTree::insert(Body* body)
 {
     // First insert
     if (_body_count == 0)
@@ -101,7 +101,7 @@ void BHTree::_split()
     _sw = new BHTree(size, _bottom_left, _smoothing, _g, _depth + 1);
 }
 
-void BHTree::_insert_child(const Body* body) 
+void BHTree::_insert_child(Body* body) 
 {
 
     // East

@@ -28,6 +28,7 @@
 
 // Numerical
 #include "Wolf/numerical/Random.h"
+#include "Wolf/numerical/numerical.h"
 
 // Utils
 #include "Wolf/utils/File.h"

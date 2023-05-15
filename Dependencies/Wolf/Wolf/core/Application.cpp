@@ -2,7 +2,7 @@
 #include "Application.h"
 #include <GLFW/glfw3.h>
 #include "../rendering/RenderCommand.h"
-
+#include "../imgui_layer/imgui_layer.h"
 
 namespace Wolf
 {
@@ -32,7 +32,6 @@ namespace Wolf
 
         _graphics_context = GraphicsContext::create(_mainWindow);
         _graphics_context->init();
-
         return true;
     }
 
@@ -40,13 +39,14 @@ namespace Wolf
     {
         // Updates from the overlays to the lowest
         auto layers = _layer_stack.get_layers();
-        for (auto it = layers.rbegin(); it != layers.rend(); ++it)
+
+        for (auto it = layers.rbegin(); it != layers.rend(); it++)
         {
             if (event->handled)
                 return;
-
             (*it)->on_event(event);
         }
+
         EventDispatcher disptacher = EventDispatcher(event);
         disptacher.dispatch<WindowResizeEvent>(
             EventType::WindowResize,
@@ -63,7 +63,6 @@ namespace Wolf
         // Updates from the lowest layer to the overlays
         for (auto layer : _layer_stack.get_layers())
             layer->on_update(delta);
-
     }
 
     void Application::on_render()
@@ -72,12 +71,21 @@ namespace Wolf
         for (auto layer : _layer_stack.get_layers())
             layer->on_render();
 
-        // ImGui rendering
-        for (auto layer : _layer_stack.get_layers())
-            layer->on_ui_render_start();
 
+        // ImGui rendering
+        _imgui_layer->on_ui_render_start();
         for (auto layer : _layer_stack.get_layers())
-            layer->on_ui_render_finish();
+        {
+            if (layer != _imgui_layer)
+                layer->on_ui_render_start();
+        }
+        for (auto layer : _layer_stack.get_layers())
+        {
+            if (layer != _imgui_layer)
+                layer->on_ui_render_finish();
+        }
+        _imgui_layer->on_ui_render_finish();
+
     }
 
     void Application::quit()

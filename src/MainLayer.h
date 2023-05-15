@@ -7,7 +7,9 @@
 #include <vector>
 #include "Body.h"
 #include "BHTree.h"
+#include "BHTreeClean.h"
 #include <memory>
+#include "Simulation.h"
 
 using namespace Wolf;
 
@@ -33,15 +35,12 @@ namespace NBody
 			Wolf::Rendering::Camera _camera;
 			Wolf::Rendering::Camera _debug_camera;
 
-			std::unordered_map<KeyCode, bool> _key_states;
-			std::vector <Body> _bodies;
+			float _simulation_speed;
+			float _simulation_size;
+			bool _debug_render;
+			glm::vec2 _clicked_position;
+			std::unique_ptr<Simulation> _simulation;
 
-			glm::vec2 _positive_furthest_pos;
-			glm::vec2 _negative_furthest_pos;
-			std::unique_ptr<BHTree> _bhtree;
-			bool _using_tree;
-			bool _render_tree;
-			bool _paralell_execution;
 	};
 }
 

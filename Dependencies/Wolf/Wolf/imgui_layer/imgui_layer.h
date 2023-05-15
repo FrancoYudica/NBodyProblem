@@ -19,6 +19,9 @@ namespace Wolf
 			virtual void on_ui_render_finish() override;
 			virtual void on_end() override;
 			virtual void on_render() override;
+
+		public:
+			bool capture_events;
 		};
 	}
 }

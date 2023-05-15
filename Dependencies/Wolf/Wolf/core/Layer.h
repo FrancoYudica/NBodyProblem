@@ -13,15 +13,18 @@ namespace Wolf
 	class Layer
 	{
 		public:
-		Layer() = default;
-		~Layer(){};
-		virtual void on_start(){};					// Added to the stack
-		virtual void on_end(){};						// Removed from the stack 
-		virtual void on_update(const Time& delta){};	// Once per frame
-		virtual void on_render(){};					// Once per frame
-		virtual void on_ui_render_start(){};
-		virtual void on_ui_render_finish(){};
-		virtual void on_event(Event* event){};	// Once per frame at event poll
+			Layer() = default;
+			~Layer(){};
+			virtual void on_start(){};					// Added to the stack
+			virtual void on_end(){};						// Removed from the stack 
+			virtual void on_update(const Time& delta){};	// Once per frame
+			virtual void on_render(){};					// Once per frame
+			virtual void on_ui_render_start(){};
+			virtual void on_ui_render_finish(){};
+			virtual void on_event(Event* event){};	// Once per frame at event poll
+
+		public:
+			std::string name = "DefaultLayer";
 	};
 
 
@@ -72,7 +75,7 @@ namespace Wolf
 		}
 		void add_overlay(Layer* layer)
 		{
-			_layers.emplace_back(layer);
+			_layers.push_back(layer);
 			_overlay_count++;
 			layer->on_start();
 		}

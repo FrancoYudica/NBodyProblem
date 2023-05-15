@@ -88,13 +88,13 @@ void Renderer2D::submit_circle(const glm::vec3& position, const float radius, co
 	_data.circle_batch.submit_primitive(position, radius, color, fade);
 }
 
-void Renderer2D::submit_line(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness)
+void Renderer2D::submit_line(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness)
 {
 	_data.line_batch.submit_primitive(p0, p1, color, thickness);
 }
 
 
-void Renderer2D::submit_line_interpolated(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color, const float thickness)
+void Renderer2D::submit_line_interpolated(const glm::vec2& p0, const glm::vec2& p1, const glm::vec4& color, const float thickness)
 {
 	_data.line_batch.submit_primitive_interpolated(p0, p1, color, thickness);
 }

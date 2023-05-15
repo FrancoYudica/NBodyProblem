@@ -5,17 +5,17 @@ namespace Wolf
 {
     namespace Input
     {
-        glm::vec2 get_world_coordinates(const Rendering::Camera& camera, glm::vec2 local)
+        glm::vec2 screen_to_world_coord(const Rendering::Camera& camera, glm::vec2 local)
         {
             return {
-                camera.get_aspect_ratio() * local.x / camera.get_zoom() + camera.get_position().x,
+                local.x / camera.get_zoom() + camera.get_position().x,
                 local.y / camera.get_zoom() + camera.get_position().y
             };
         }
-        glm::vec2 get_local_coordinates(const Rendering::Camera& camera, glm::vec2 world)
+        glm::vec2 world_to_screem_coord(const Rendering::Camera& camera, glm::vec2 world)
         {   
             return {
-                (world.x - camera.get_position().x) * camera.get_zoom() / camera.get_aspect_ratio(),
+                (world.x - camera.get_position().x) * camera.get_zoom(),
                 (world.y - camera.get_position().y) * camera.get_zoom()
             };
         }

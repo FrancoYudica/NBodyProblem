@@ -6,14 +6,6 @@
 #include <queue>
 #include <execution>
 
-template<typename T>
-static T clamp(T a, T min, T max)
-{
-	if (a > max)
-		return max;
-	
-	return (a < min) ? min : a;
-}
 
 namespace NBody
 {
@@ -23,12 +15,9 @@ namespace NBody
 		Window* window = Application::get()->get_main_window();
 		_camera = Wolf::Rendering::Camera(window->get_width(), window->get_height(), 1);
 		_debug_camera = Wolf::Rendering::Camera(window->get_width(), window->get_height(), 1);
-		_key_states[KeyCode::KEY_W] = false;
-		_key_states[KeyCode::KEY_D] = false;
-		_key_states[KeyCode::KEY_S] = false;
-		_key_states[KeyCode::KEY_A] = false;
-		_using_tree = true;
-		_paralell_execution = false;
+		_debug_render = false;
+		_simulation_speed = 1.0f;
+		_simulation = std::make_unique<BarnesHutSimulation>();
 		_reset_simulation();
 	}
 	void MainLayer::on_event(Event* event)
@@ -39,20 +28,6 @@ namespace NBody
 			[this](WindowResizeEvent* resize_event){
 				_camera.on_viewport_resize(resize_event->width, resize_event->height);
 				_debug_camera.on_viewport_resize(resize_event->width, resize_event->height);
-				return false;
-			}
-		);
-		dispatcher.dispatch<KeyDownEvent>(
-			EventType::KeyDown,
-			[this](KeyDownEvent* key_event){
-				_key_states[key_event->key] = true;
-				return false;
-			}
-		);
-		dispatcher.dispatch<KeyUpEvent>(
-			EventType::KeyUp,
-			[this](KeyUpEvent* key_event){
-				_key_states[key_event->key] = false;
 				return false;
 			}
 		);
@@ -72,123 +47,65 @@ namespace NBody
 			EventType::ButtonDown,
 			[this](ButtonDownEvent* event)
 			{
-				auto pos = Wolf::Input::get_mouse_pos_norm();
-
-				std::cout << pos.x << ", " << pos.y << std::endl;
-				glm::vec2 position = Wolf::Input::get_world_coordinates(_camera, pos);
-				glm::vec2 p1 = Wolf::Input::get_local_coordinates(_camera, position);
-				std::cout << p1.x << ", " << p1.y << std::endl;
-
-				_bodies.emplace_back(Body{position, {0, 0}, 20});
+				_clicked_position = Input::get_mouse_pos();
 				return false;
 			}
 		);
-		
+
+		dispatcher.dispatch<ButtonUpEvent>(
+			EventType::ButtonUp,
+			[this](ButtonUpEvent* event)
+			{
+				auto pos = Wolf::Input::get_mouse_pos();
+				glm::vec2 direction = pos - _clicked_position;
+				glm::vec2 position = Wolf::Input::screen_to_world_coord(_camera, pos);
+				_simulation->add_body(position, -direction, 20);
+				return false;
+			}
+		);
 	}
 	void MainLayer::on_update(const Time& delta)
 	{
-		
 		// Updates camera translation
 		float speed = 2.0f * delta.seconds() / _camera.get_zoom();
 		glm::vec3 direction(0);
-		if (_key_states[KeyCode::KEY_W])
+		if (Wolf::Input::is_key_down(KeyCode::KEY_W))
 			direction += glm::vec3(0, 1, 0);
-		if (_key_states[KeyCode::KEY_S])
+		if (Wolf::Input::is_key_down(KeyCode::KEY_S))
 			direction += glm::vec3(0, -1, 0);
-		if (_key_states[KeyCode::KEY_D])
+		if (Wolf::Input::is_key_down(KeyCode::KEY_D))
 			direction += glm::vec3(1, 0, 0);
-		if (_key_states[KeyCode::KEY_A])
+		if (Wolf::Input::is_key_down(KeyCode::KEY_A))
 			direction += glm::vec3(-1, 0, 0);
+
 		_camera.set_position(_camera.get_position() + direction * speed);
 
-		float delta_seconds = 1.0f / 200.0f; //delta.seconds();
+		float step = 1.0f / 200.0f * _simulation_speed;
 		float smoothing = 0.001;
-		float g = 6e-4;
-		if (_using_tree)
+		float g = 6e-5;
+		_simulation->update(g, smoothing, step);
+
+		/*
+		for (Body& body : _bodies)
+			_tree_clean->attract(&body, delta_seconds);
+
+		uint32_t index = 0;
+
+		while(index < _bodies.size())
 		{
-			// Updates Barnes Hut tree
-			float tree_size = std::max(abs(_negative_furthest_pos.x - _positive_furthest_pos.x), abs(_negative_furthest_pos.y - _positive_furthest_pos.y));
-			_bhtree = std::make_unique<BHTree>(2.0f * tree_size, glm::vec2(-tree_size * 1.0f), smoothing, g);
-
-			// Inserts all the bodies
-			for (Body& body : _bodies)
-				_bhtree->insert(&body);
-
-
-			if (_paralell_execution)
+			Body& body = _bodies[index];
+			if (!body.tree->translate(&body, 1.0f / 200.0f))
 			{
-				std::vector<uint32_t> indices = {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
-				std::for_each(
-					std::execution::par,
-					indices.begin(),
-					indices.end(),
-					[this, delta_seconds](uint32_t start_index)
-					{
-						for (uint32_t i = start_index; i < start_index + 1000; i++)
-							_bhtree->attract(&_bodies[i], delta_seconds);
-					}
-				);
+				_bodies.erase(_bodies.begin() + index);
 			}
 			else
 			{
-				// Calculates acceleration, and adds to velocity - Verlet Intergration
-				for (Body& body : _bodies)
-					_bhtree->attract(&body, delta_seconds);
+				index++;
 			}
 		}
-		else
-		{
-			// Calculates gravity
+		*/
 
-			for (uint32_t i = 0; i < _bodies.size(); i++)
-			{
-				Body& b1 = _bodies[i];
-				for (uint32_t j = i + 1; j < _bodies.size(); j++)
-				{
-					Body& b2 = _bodies[j];
-					glm::vec2 b2_to_b1 = b1.position - b2.position;
-					float inv = g /  (b2_to_b1.x * b2_to_b1.x + b2_to_b1.y * b2_to_b1.y + smoothing);
-
-					float magnitude_to_b1 = b2.mass * inv;
-					float magnitude_to_b2 = b1.mass * inv;
-
-					glm::vec2 norm_dir_to_b2 = glm::normalize(b2_to_b1);
-
-					glm::vec2 b1_acceleration = -delta_seconds * magnitude_to_b1 * norm_dir_to_b2;
-					glm::vec2 b2_acceleration = delta_seconds * magnitude_to_b2 * norm_dir_to_b2;
-					b1.velocity += b1_acceleration;
-					b2.velocity += b2_acceleration;
-				}
-			}
-		}
-
-		if (_paralell_execution)
-		{
-			std::for_each(
-				std::execution::par,
-				_bodies.begin(),
-				_bodies.end(),
-				[this, delta_seconds](Body& body)
-				{
-					body.position += delta_seconds * body.velocity;
-					_positive_furthest_pos.x = std::max(_positive_furthest_pos.x, body.position.x);
-					_positive_furthest_pos.y = std::max(_positive_furthest_pos.y, body.position.y);
-					_negative_furthest_pos.x = std::min(_negative_furthest_pos.x, body.position.x);
-					_negative_furthest_pos.y = std::min(_negative_furthest_pos.y, body.position.y);
-				}
-			);
-		}
-		else
-		{
-			for (Body& body : _bodies)
-			{
-				body.position += delta_seconds * body.velocity;
-				_positive_furthest_pos.x = std::max(_positive_furthest_pos.x, body.position.x);
-				_positive_furthest_pos.y = std::max(_positive_furthest_pos.y, body.position.y);
-				_negative_furthest_pos.x = std::min(_negative_furthest_pos.x, body.position.x);
-				_negative_furthest_pos.y = std::min(_negative_furthest_pos.y, body.position.y);
-			}
-		}
+		
 	}
 	void MainLayer::on_ui_render_start()
 	{
@@ -200,31 +117,20 @@ namespace NBody
 		ImGui::End();
 
 		ImGui::Begin("Simulation");
-		std::string a = "Body count: " + std::to_string(_bodies.size());
-		ImGui::Text(a.c_str());
+		std::string body_count_text = "Body count: " + std::to_string(_simulation->body_count());
+		ImGui::Text(body_count_text.c_str());
 		
-		if (_using_tree)
-		{
-			if (ImGui::Button("Method -> Brute force"))
-				_using_tree = false;
-		}
-		else
-		{
-			if(ImGui::Button("Method -> Tree"))
-				_using_tree = true;
-		}
+		ImGui::Checkbox("Debug render", &_debug_render);
 
-		ImGui::Checkbox("Render BHTree", &_render_tree);
-		ImGui::Checkbox("Paralell execution", &_paralell_execution);
+		ImGui::DragFloat("Simulation speed", &_simulation_speed, 0.05f, 0.1f, 3.0f);
 
 		if (ImGui::Button("Reset simulation"))
 			_reset_simulation();
 
+		if(ImGui::Button("Clear"))
+			_simulation->clear();
 
 		ImGui::End();
-
-		
-
 	}
 	void MainLayer::on_ui_render_finish()
 	{
@@ -235,71 +141,66 @@ namespace NBody
 	void MainLayer::on_render()
 	{
 		
-		// Renders objects
-		Rendering::Renderer2D::begin_scene(_camera);
-		Rendering::Renderer2D::new_frame();
-		auto color = glm::vec4(1.0f);
-		float max_color_speed = 4.0f;
-		for (const Body& body : _bodies)
-		{
-			float t = clamp(glm::length(body.velocity), 0.0f, max_color_speed) / max_color_speed;
-			glm::vec3 c = glm::vec3(1) + t * (glm::vec3(1, -1, -.51));
-			Rendering::Renderer2D::submit_circle(glm::vec3(body.position, 0), 0.005f * body.mass, glm::vec4(c, 1));
-		}
+		if (_debug_render)
+			_simulation->debug_render(_camera);
 
-		if (_render_tree)
-		{
-			// Breadth first search for rendering the tree
-			std::queue<const BHTree*> queue;
-			queue.push(_bhtree.get());
-			glm::vec4 line_color = {0, 1, .6, 1};
-			float line_thickness = 0.01f;
-
-			while (queue.size() != 0)
-			{
-				const BHTree* tree = queue.front();
-				queue.pop();
-
-				if (!tree->is_leaf())
-				{
-					queue.push(tree->north_east());
-					queue.push(tree->north_west());
-					queue.push(tree->south_east());
-					queue.push(tree->south_west());
-				}
-
-				float size = tree->get_size();
-				glm::vec3 bottom_left = glm::vec3(tree->get_bottom_left(), 0.0f);
-				glm::vec3 top_left = bottom_left + glm::vec3(0.0f, size, 0.0f);
-				glm::vec3 top_right = bottom_left + glm::vec3(size, size, 0.0f);
-				glm::vec3 bottom_right = bottom_left + glm::vec3(size, 0.0f, 0.0f);
-				Rendering::Renderer2D::submit_line(bottom_left, bottom_right, line_color, line_thickness);
-				Rendering::Renderer2D::submit_line(bottom_left, top_left, line_color, line_thickness);
-				Rendering::Renderer2D::submit_line(top_left, top_right, line_color, line_thickness);
-				Rendering::Renderer2D::submit_line(bottom_right, top_right, line_color, line_thickness);
-			}
-		}
-
-		glm::vec2 local_pos = Wolf::Input::get_world_coordinates(_camera, glm::vec3(0));
-		Rendering::Renderer2D::submit_circle(glm::vec3(local_pos, 0), 0.1, glm::vec4(0, 1, 0, 1));
-		Rendering::Renderer2D::end_frame();
+		_simulation->render(_camera);
 
 		// Debug rendering
 		Rendering::Renderer2D::begin_scene(_debug_camera);
 		Rendering::Renderer2D::new_frame();
+		// Simulation boundary rectangle
+		glm::vec4 boundary_color = {1, 1, 1, 1};
+		float thickness = 0.01;
+		float half_size = _simulation_size * 0.5f;
+		glm::vec2 bottom_left =   Input::world_to_screem_coord(_camera, {-half_size, -half_size});
+		glm::vec2 bottom_right = Input::world_to_screem_coord(_camera, {half_size, -half_size});
+		glm::vec2 top_right = Input::world_to_screem_coord(_camera,  {half_size, half_size});
+		glm::vec2 top_left = Input::world_to_screem_coord(_camera, {-half_size, half_size});
+		Rendering::Renderer2D::submit_line(bottom_left, bottom_right, boundary_color, thickness);
+		Rendering::Renderer2D::submit_line(bottom_left, top_left, boundary_color, thickness);
+		Rendering::Renderer2D::submit_line(top_left, top_right, boundary_color, thickness);
+		Rendering::Renderer2D::submit_line(bottom_right, top_right, boundary_color, thickness);
+
+		if (Input::is_button_down(MouseButton::LEFT))
+		{
+			glm::vec2 pos = Input::get_mouse_pos();
+			Rendering::Renderer2D::submit_line(pos, _clicked_position, {1, 0, 0, 1}, 0.01f);
+		}
+
 		Rendering::Renderer2D::end_frame();
 	}
 
 	void MainLayer::_reset_simulation()
 	{
-		_bodies.clear();
-		_bodies.reserve(4000);
+		//_bodies.clear();
+		uint32_t start_body_count = 30;
+		_simulation_size = 1;
 
-		_positive_furthest_pos = glm::vec2(10);
-		_negative_furthest_pos = glm::vec2(10);
-		float max_speed_axis = 0.5f;
+		_simulation->clear();
+		_simulation->init(start_body_count, _simulation_size);
+		float smoothing = 0.001;
+		float g = 6e-5;
+		uint32_t size = static_cast<uint32_t>(sqrt(start_body_count));
+		float step = static_cast<float>(_simulation_size) / static_cast<float>(size);
+		for (uint32_t i = 1; i < size; i++)
+		{
+			float x = step * i - _simulation_size * 0.5f;			
+			for (uint32_t j = 1; j < size; j++)
+			{
+				float y = step * j - _simulation_size * 0.5f;
+				float mass = Wolf::Numerical::Random::range_f(15.0f, 30.0f);
+				_simulation->add_body({x, y}, {0, 0}, mass);
+			}
+		}
 
-		for (uint32_t i = 0; i < 250; i++)
+		// Inserts all the objects into the tree for the first time
+		//for (Body& body : _bodies)
+		//	_tree_clean->insert(&body);
+
+		/*
+
+		for (uint32_t i = 0; i < 200; i++)
 		{
 			float x = Wolf::Numerical::Random::range_f(-2, -.5f);
 			float y = Wolf::Numerical::Random::range_f(-1, 0.4);
@@ -307,11 +208,10 @@ namespace NBody
 			float x_vel = Wolf::Numerical::Random::range_f(0, 0);
 			float y_vel = Wolf::Numerical::Random::range_f(0, .5);
 			float mass = Wolf::Numerical::Random::range_f(5.0f, 15.0f);
-			Body body = Body{{x, y}, {x_vel, y_vel}, mass};
-			_bodies.push_back(body);
+			_bodies.push_back(Body{{x, y}, {x_vel, y_vel}, mass});
 		}
 
-		for (uint32_t i = 0; i < 250; i++)
+		for (uint32_t i = 0; i < 200; i++)
 		{
 			float x = Wolf::Numerical::Random::range_f(0.5, 2);
 			float y = Wolf::Numerical::Random::range_f(-1, 0.4);
@@ -323,9 +223,6 @@ namespace NBody
 			_bodies.push_back(body);
 		}
 
-
-		_positive_furthest_pos = glm::vec2(4);
-		_negative_furthest_pos = glm::vec2(-4);
 
 		glm::vec2 center(0.0f, 0.0f);
 
@@ -348,6 +245,8 @@ namespace NBody
 			Body body = Body{{x, y}, velocity, Wolf::Numerical::Random::range_f(10, 20)};
 			_bodies.push_back(body);
 		}
+		*/
+
 	}
 }
 

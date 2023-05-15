@@ -9,8 +9,8 @@ namespace Wolf
     namespace Input
     {
         
-        glm::vec2 get_world_coordinates(const Rendering::Camera& camera, glm::vec2 local);
-        glm::vec2 get_local_coordinates(const Rendering::Camera& camera, glm::vec2 world);
+        glm::vec2 screen_to_world_coord(const Rendering::Camera& camera, glm::vec2 local);
+        glm::vec2 world_to_screem_coord(const Rendering::Camera& camera, glm::vec2 world);
     }
 }
 
