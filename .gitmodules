@@ -1,0 +1,3 @@
+[submodule "Dependencies/WolfEngine"]
+	path = Dependencies/WolfEngine
+	url = https://github.com/FrancoYudica/WolfEngine.git

@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "src/MainLayer.h"
-#include "Dependencies/Wolf/WEngine.h"
+#include "Dependencies/WolfEngine/Wolf/WEngine.h"
 #include <glm/glm.hpp>
 
 int main()
