@@ -2,7 +2,7 @@
 #ifndef BATCH_LAYER_H
 #define BATCH_LAYER_H
 
-#include "../Dependencies/WolfEngine/Wolf/WEngine.h"
+#include "WEngine.h"
 #include <unordered_map>
 #include <vector>
 #include "Body.h"

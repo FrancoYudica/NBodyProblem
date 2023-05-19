@@ -1,5 +1,5 @@
 #include "Simulation.h"
-#include "../Dependencies/WolfEngine/Wolf/WEngine.h"
+#include "WEngine.h"
 #include "BHTree.h"
 #include <queue>
 

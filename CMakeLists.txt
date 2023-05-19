@@ -14,5 +14,7 @@ file(GLOB SRC_CPP src/*.cpp)
 
 add_executable(${PROJECT_NAME} main.cpp ${SRC_H} ${SRC_CPP})
 
+target_include_directories(${PROJECT_NAME} PUBLIC "Dependencies/WolfEngine/Wolf")
+
 target_link_libraries(${PROJECT_NAME} PRIVATE dependencies)
 
