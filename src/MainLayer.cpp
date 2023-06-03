@@ -174,8 +174,8 @@ namespace NBody
 	void MainLayer::_reset_simulation()
 	{
 		//_bodies.clear();
-		uint32_t start_body_count = 30;
-		_simulation_size = 1;
+		uint32_t start_body_count = 7000;
+		_simulation_size = 2;
 
 		_simulation->clear();
 		_simulation->init(start_body_count, _simulation_size);
@@ -189,17 +189,13 @@ namespace NBody
 			for (uint32_t j = 1; j < size; j++)
 			{
 				float y = step * j - _simulation_size * 0.5f;
-				float mass = Wolf::Numerical::Random::range_f(15.0f, 30.0f);
+				float mass = 21; //Wolf::Numerical::Random::range_f(15.0f, 23.0f);
 				_simulation->add_body({x, y}, {0, 0}, mass);
 			}
 		}
 
 		// Inserts all the objects into the tree for the first time
-		//for (Body& body : _bodies)
-		//	_tree_clean->insert(&body);
-
 		/*
-
 		for (uint32_t i = 0; i < 200; i++)
 		{
 			float x = Wolf::Numerical::Random::range_f(-2, -.5f);
@@ -208,7 +204,7 @@ namespace NBody
 			float x_vel = Wolf::Numerical::Random::range_f(0, 0);
 			float y_vel = Wolf::Numerical::Random::range_f(0, .5);
 			float mass = Wolf::Numerical::Random::range_f(5.0f, 15.0f);
-			_bodies.push_back(Body{{x, y}, {x_vel, y_vel}, mass});
+			_simulation->add_body({x, y}, {x_vel, y_vel}, mass);
 		}
 
 		for (uint32_t i = 0; i < 200; i++)
@@ -219,8 +215,7 @@ namespace NBody
 			float x_vel = Wolf::Numerical::Random::range_f(0, 0);
 			float y_vel = Wolf::Numerical::Random::range_f(0, -.5);
 			float mass = Wolf::Numerical::Random::range_f(5.0f, 15.0f);
-			Body body = Body{{x, y}, {x_vel, y_vel}, mass};
-			_bodies.push_back(body);
+			_simulation->add_body({x, y}, {x_vel, y_vel}, mass);
 		}
 
 
@@ -242,11 +237,10 @@ namespace NBody
 
 			glm::vec2 velocity(-sin(angle), cos(angle));
 			velocity = (1.3f * distance) * glm::normalize(velocity);
-			Body body = Body{{x, y}, velocity, Wolf::Numerical::Random::range_f(10, 20)};
-			_bodies.push_back(body);
+			_simulation->add_body({x, y}, {0, 0}, 1);
+
 		}
 		*/
-
 	}
 }
 
